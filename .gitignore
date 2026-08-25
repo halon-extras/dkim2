@@ -1,0 +1,7 @@
+*.so
+*.h
+/build/dist
+/build/vscode
+.DS_Store
+.idea
+license.key

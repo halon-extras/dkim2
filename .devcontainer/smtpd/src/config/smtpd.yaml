@@ -1,0 +1,18 @@
+version: "5.8"
+servers:
+  - id: default
+    listeners:
+      - port: 25
+        address: 127.0.0.1
+environment:
+  uuid:
+    version: 4
+  controlsocket:
+    group: staff
+    chmod: "0660"
+  privdrop:
+    user: halon
+    group: halon
+  umask: "0027"
+  rlimit:
+    nofile: 70000

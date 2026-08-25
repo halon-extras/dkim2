@@ -1,0 +1,41 @@
+{
+  "name": "dkim2",
+  "context": "..",
+  "dockerFile": "./Dockerfile",
+  "overrideCommand": false,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "halon.hsl-syntax",
+        "halon.vscode-halon",
+        "halon.hsl-linter",
+        "halon.hsl-debug",
+        "golang.go"
+      ],
+      "settings": {
+        "go.lintTool": "golangci-lint",
+        "go.lintFlags": [
+          "--path-mode=abs",
+          "--fast-only"
+        ],
+        "go.formatTool": "custom",
+        "go.alternateTools": {
+          "customFormatter": "golangci-lint"
+        },
+        "go.formatFlags": [
+          "fmt",
+          "--stdin"
+        ]
+      }
+    }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/smtpd/dist,target=/etc/halon,type=bind,consistency=cached"
+  ],
+  "build": {
+    "args": {
+      "HALON_REPO_USER": "${localEnv:HALON_REPO_USER}",
+      "HALON_REPO_PASS": "${localEnv:HALON_REPO_PASS}"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "name": "dkim2_sign",
+    "parameters": {
+      "required": [
+        {
+          "name": "mail",
+          "type": "File"
+        },
+        {
+          "name": "mailfrom",
+          "type": "string"
+        },
+        {
+          "name": "rcptto",
+          "type": "array"
+        },
+        {
+          "name": "selector",
+          "type": "string"
+        },
+        {
+          "name": "domain",
+          "type": "string"
+        },
+        {
+          "name": "privatekey",
+          "type": "PrivateKey|string"
+        }
+      ],
+      "optional": [
+        {
+          "name": "dkim2options",
+          "type": "array"
+        }
+      ]
+    },
+    "returnType": "array",
+    "detail": "dkim2_sign(File $mail, string $mailfrom, array $rcptto, string $selector, string $domain, PrivateKey $privatekey [, array $dkim2options]): array",
+    "value": "dkim2_sign($0)",
+    "documentation": "Create DKIM2-Signature and Message-Instance headers",
+    "link": "[Full documentation](https://github.com/halon-extras/dkim2)"
+  },
+  {
+    "name": "dkim2_verify",
+    "parameters": {
+      "required": [
+        {
+          "name": "mail",
+          "type": "File"
+        },
+        {
+          "name": "mailfrom",
+          "type": "string"
+        },
+        {
+          "name": "rcptto",
+          "type": "array"
+        }
+      ],
+      "optional": [
+        {
+          "name": "dkim2options",
+          "type": "array"
+        }
+      ]
+    },
+    "returnType": "array",
+    "detail": "dkim2_verify(File $mail, string $mailfrom, array $rcptto, [, array $dkim2options]): array",
+    "value": "dkim2_verify($0)",
+    "documentation": "Verify email signed with dkim2",
+    "link": "[Full documentation](https://github.com/halon-extras/dkim2)"
+  }
+]

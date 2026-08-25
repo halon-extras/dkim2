@@ -1,0 +1,18 @@
+environment:
+  controlsocket:
+    chmod: '0660'
+    group: staff
+  privdrop:
+    group: halon
+    user: halon
+  rlimit:
+    nofile: 70000
+  umask: '0027'
+  uuid:
+    version: 4
+servers:
+- id: default
+  listeners:
+  - address: 127.0.0.1
+    port: 25
+version: '5.8'

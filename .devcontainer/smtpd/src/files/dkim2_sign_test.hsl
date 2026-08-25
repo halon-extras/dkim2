@@ -1,0 +1,87 @@
+import { dkim2_sign } from "extras://dkim2";
+
+$mail = MailMessage::File(File("simple_email.eml"));
+$privatekeystring = File::read("dkim2_ed25519_test_key.private");
+$privatekey = ed25519_privatekey($privatekeystring);
+$rcptto = ["recipient@example.com"];
+
+$tests = [
+    [
+        "name" => "Has exploded, donotexplode and timestamp",
+        "options" => [
+            "timestamp" => 1740000000,
+            "exploded" => true,
+            "donotexplode" => true
+        ],
+        "expected" => [
+            "f" => "exploded,donotexplode",
+            "t" => 1740000000
+        ]
+    ],
+    [
+        "name" => "Has exploded, timestamp and nonce",
+        "options" => [
+            "timestamp" => 1740000000,
+            "nonce" => "test-nonce",
+            "exploded" => true,
+            "feedback" => false,
+        ],
+        "expected" => [
+            "t" => 1740000000,
+            "f" => "exploded",
+            "n" => "test-nonce"
+        ]
+    ],
+    [
+        "name" => "Has donotmodify, donotexplode and timestamp",
+        "options" => [
+            "timestamp" => 1740000000,
+            "donotmodify" => true,
+            "donotexplode" => true,
+        ],
+        "expected" => [
+            "t" => 1740000000, 
+            "f" => "donotexplode,donotmodify"
+        ]
+    ],
+    [
+        "name" => "Has feedback, exploded and timestamp",
+        "options" => [
+            "timestamp" => 1740000000,
+            "feedback" => true,
+            "exploded" => true
+        ],
+        "expected" => [
+            "t" => 1740000000,
+            "f" => "exploded,feedback"
+        ]
+    ]
+];
+
+foreach ($tests as $test) {
+    $signed = dkim2_sign(
+        $mail->toFile(),
+        "sender@test1.dkim2.com",
+        $rcptto,
+        "ed25519",
+        "test1.dkim2.com",
+        $privatekey,
+        $test["options"]
+    );
+
+    foreach ($signed["headers"] as $header)
+        $mail->modifyContent(0, 0, $header);
+
+    $tags = header_dkim_decode(
+        MailMessage::String($mail->toString())->getHeader("Dkim2-Signature")
+    );
+
+    foreach ($test["expected"] as $tag => $expected) {
+        if ($tags[$tag] != $expected)
+            throw Exception($test["name"] . " failed: unexpected " . $tag . " tag");
+    }
+
+    $mail->reset();
+}
+
+echo "test ok";

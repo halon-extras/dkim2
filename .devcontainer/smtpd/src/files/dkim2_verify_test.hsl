@@ -1,0 +1,25 @@
+import { dkim2_verify } from "extras://dkim2";
+
+$mail = MailMessage::File(File("simple_email_signed.eml"));
+
+$rcptto = ["recipient@example.com"];
+
+$dkim2options = [
+    "ignoretimestamp" => true,
+];
+
+$verified = dkim2_verify($mail->toFile(), "sender@test1.dkim2.com", $rcptto, $dkim2options);
+
+if (!$verified["result"]) 
+{
+    echo "dkim2 signature not found";
+}
+
+else if ($verified["result"] != "pass")
+{
+    throw $verified["error"];
+} 
+else 
+{
+    echo "verfied ok!";
+}

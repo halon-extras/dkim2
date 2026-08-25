@@ -1,0 +1,175 @@
+plugins:
+- id: dkim2
+resolver:
+  cache:
+    size: 10000
+scripting:
+  files:
+  - data: |
+      -----BEGIN PRIVATE KEY-----
+      MC4CAQAwBQYDK2VwBCIEIJ2tcqp3P4LNYMblEZUNiCJ2E87uqN9MjfOXNRsREBGv
+      -----END PRIVATE KEY-----
+    id: dkim2_ed25519_test_key.private
+  - data: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCdcKPoxgYIvyhO
+      wBX3J8IL+LugkjMwQ79aITdWsu5nI0C033x7COIJylCDAq7Gb3akWyj73wMHdJhY
+      omXmf1GVNcXi2S2sJZAOrBt5qVYnbjGq25fbL+qaQlQpToP20iwVJPFWBJH5ezeV
+      QkLK4d85IieMOVcOUDN704agC/a1BLIbQfE9Gi54yQAJoI3D5ZH5SRnq2VWWaPh+
+      jhVdocYXnFi1FpDaTY83lVB0nY4RbTKK7JSVlpeYHBgJ7MshYZ8vEOGZOKJ6xi7g
+      s3URTcoseaV647P+0hR5x3tXt0RglSfmN/yNk5GRzG0JcXeevbuzwRdUdg9e7JB6
+      ZklohB73AgMBAAECggEAQFjUzSL+PV3vmfwdHiZ0Q1NWUELgxAW0dCBmTzuTf7jj
+      TemXpWuUgv7a2CjlCPpuia8ueX8E7GulhnhdYI9B51OSfOxZo+W4Up7aHefta/E4
+      QIY+sxmK76BTaIyMF/l/hebS8l6s0MQhDBKIXQZjJyVD96ZJ4/I4kI/8EnbBTusm
+      +Ed7blVWKOIFLmQpzyo1pLydkR9bj3LU+dyrYk1qAu2Ur+7v1EMsNjhk91a4/WQH
+      wxGmSHH37r9GTFXz1vwNHwjSATw4dWd76x1q6jGDw0B85jHpFTNPKKXys+2f4woR
+      BnCULlakFc3OQyTSSu/Ud2GvgdM9jUV83heYNg5bpQKBgQDd5Jnzsk9ZaU8uVKKH
+      o1E+r0pEfSta0ByeWWz/6jNYusuWQb8qC2xoUCJFWGrSuiIs9S44ycultSD4tYE8
+      XdsYbFrMptpgLRd42jmOLHzdR3yrZxrR6CmgwfuM6svklUrYirhIbNbjg0CmRD/F
+      37SlD9llAgpnccHqbrCeMqYw8wKBgQC1o9csXtXRjjl5KckKX1VKkYQOasBAaWfx
+      8YquZzbRtku70UyTSBias+QTvP641fsp1dJ0Vq26ohk2pN4D+fhm5TbM9u86jRsh
+      yfcKpaM1OilTmsVFx+HRIyO/Cn+2NLMLU+UaEC9vu8Uzli9pJBILbqKo4Q7HOhHl
+      ++qYRpd67QKBgQCpXOD9Fu5lynF7ZXIgoVFTzSuclwVObWZKnusJclL6uKjH6Srm
+      Bo4aGH/v+gqfCR8ovYMoKS5dLqEZ9D/OOb0PKTUs23X2zrQJtFcV43Ly2quXkDzy
+      VoffgfBkoJo7wI++NDNwZFKomPfxcEpU1+jjy/Mcm7AhQLzIGPCJ7xLWbQKBgQCg
+      jc8fuEAVuDqTH91FntjcTd3FhJSlGsa3dILZ///TxOgSf0HJmdutuz7qN4+MQBB/
+      fTJGhWuQ4cGZrIdWSnlIMmmLKOZzAdEuv7/vGFQ4M03eSZsAQFsZqo7pSdVzcAen
+      BqQmspHLmNUJ8UG9FRYiJsv+rNiMP4ccm91UdmllTQKBgGXDT9M2+xBZxR8s5jWy
+      Sb0HKGsGwSMOIwbW5TUJajSxLsxLoXuD+CIiO4nx65ymd9zSapMVWdSu5xQrWzk+
+      9PQFWP5jv5+VWZq0IpelGljM5bcueLLDh5dyH2ZqhuIK8I4DWnkF9wc9eVZfHA3J
+      HrRXmkfXrQ93yVda2laydpqv
+      -----END PRIVATE KEY-----
+    id: dkim2_rsa_test_key.private
+  - data: "import { dkim2_sign } from \"extras://dkim2\";\n\n$mail = MailMessage::File(File(\"\
+      simple_email.eml\"));\n$privatekeystring = File::read(\"dkim2_ed25519_test_key.private\"\
+      );\n$privatekey = ed25519_privatekey($privatekeystring);\n$rcptto = [\"recipient@example.com\"\
+      ];\n\n$tests = [\n    [\n        \"name\" => \"Has exploded, donotexplode and\
+      \ timestamp\",\n        \"options\" => [\n            \"timestamp\" => 1740000000,\n\
+      \            \"exploded\" => true,\n            \"donotexplode\" => true\n \
+      \       ],\n        \"expected\" => [\n            \"f\" => \"exploded,donotexplode\"\
+      ,\n            \"t\" => 1740000000\n        ]\n    ],\n    [\n        \"name\"\
+      \ => \"Has exploded, timestamp and nonce\",\n        \"options\" => [\n    \
+      \        \"timestamp\" => 1740000000,\n            \"nonce\" => \"test-nonce\"\
+      ,\n            \"exploded\" => true,\n            \"feedback\" => false,\n \
+      \       ],\n        \"expected\" => [\n            \"t\" => 1740000000,\n  \
+      \          \"f\" => \"exploded\",\n            \"n\" => \"test-nonce\"\n   \
+      \     ]\n    ],\n    [\n        \"name\" => \"Has donotmodify, donotexplode\
+      \ and timestamp\",\n        \"options\" => [\n            \"timestamp\" => 1740000000,\n\
+      \            \"donotmodify\" => true,\n            \"donotexplode\" => true,\n\
+      \        ],\n        \"expected\" => [\n            \"t\" => 1740000000, \n\
+      \            \"f\" => \"donotexplode,donotmodify\"\n        ]\n    ],\n    [\n\
+      \        \"name\" => \"Has feedback, exploded and timestamp\",\n        \"options\"\
+      \ => [\n            \"timestamp\" => 1740000000,\n            \"feedback\" =>\
+      \ true,\n            \"exploded\" => true\n        ],\n        \"expected\"\
+      \ => [\n            \"t\" => 1740000000,\n            \"f\" => \"exploded,feedback\"\
+      \n        ]\n    ]\n];\n\nforeach ($tests as $test) {\n    $signed = dkim2_sign(\n\
+      \        $mail->toFile(),\n        \"sender@test1.dkim2.com\",\n        $rcptto,\n\
+      \        \"ed25519\",\n        \"test1.dkim2.com\",\n        $privatekey,\n\
+      \        $test[\"options\"]\n    );\n\n    foreach ($signed[\"headers\"] as\
+      \ $header)\n        $mail->modifyContent(0, 0, $header);\n\n    $tags = header_dkim_decode(\n\
+      \        MailMessage::String($mail->toString())->getHeader(\"Dkim2-Signature\"\
+      )\n    );\n\n    foreach ($test[\"expected\"] as $tag => $expected) {\n    \
+      \    if ($tags[$tag] != $expected)\n            throw Exception($test[\"name\"\
+      ] . \" failed: unexpected \" . $tag . \" tag\");\n    }\n\n    $mail->reset();\n\
+      }\n\necho \"test ok\";"
+    id: dkim2_sign_test.hsl
+  - data: |-
+      import { dkim2_sign } from "extras://dkim2";
+
+      $mail = MailMessage::File(File("simple_email.eml"));
+      $privatekeystring = File::read("dkim2_rsa_test_key.private");
+      $rcptto = ["recipient@example.com"];
+
+      $privatekey = rsa_privatekey($privatekeystring);
+
+      $signed = dkim2_sign(
+          $mail->toFile(),
+          "sender@test1.dkim2.com",
+          $rcptto,
+          "ed25519",
+          "test1.dkim2.com",
+          $privatekey,
+          [
+          "timestamp" => 1740000000,
+          "exploded" => true,
+          "donotexplode" => true
+          ]
+      );
+
+      foreach ($signed["headers"] as $header)
+          $mail->modifyContent(0, 0, $header);
+
+      $tags = header_dkim_decode(MailMessage::String($mail->toString())->getHeader("Dkim2-Signature"));
+      if ($tags["f"] != "exploded,donotexplode") {
+          throw Exception("fail: f= does not equal 'exploded,donotexplode'");
+      }
+      if ($tags["t"] != "1740000000") {
+          throw Exception("fail: t= does not equal '1740000000'");
+      }
+
+      echo "test ok";
+    id: dkim2_sign_test_rsa.hsl
+  - data: "import { dkim2_verify } from \"extras://dkim2\";\n\n$mail = MailMessage::File(File(\"\
+      simple_email_signed.eml\"));\n\n$rcptto = [\"recipient@example.com\"];\n\n$dkim2options\
+      \ = [\n    \"ignoretimestamp\" => true,\n];\n\n$verified = dkim2_verify($mail->toFile(),\
+      \ \"sender@test1.dkim2.com\", $rcptto, $dkim2options);\n\nif (!$verified[\"\
+      result\"]) \n{\n    echo \"dkim2 signature not found\";\n}\n\nelse if ($verified[\"\
+      result\"] != \"pass\")\n{\n    throw $verified[\"error\"];\n} \nelse \n{\n \
+      \   echo \"verfied ok!\";\n}\n"
+    id: dkim2_verify_test.hsl
+  - data: |-
+      From: sender@test1.dkim2.com
+      To: recipient@example.com
+      Subject: Simple test message
+      Date: Sat, 01 Mar 2026 12:00:00 +0000
+      Message-ID: <test-simple@test1.dkim2.com>
+
+      Hello, this is a simple test message.
+    id: simple_email.eml
+  - data: |-
+      Message-Instance: m=1; h=sha256:SLtzk6LO68CCaX4edrJ6yfpWbp3hwgvI8IdMBRLDk+Y=:SgG5fNGEg1x24MwItCUYGDHQkWKng06W1/IvTGBdwzU=
+      Dkim2-Signature: i=1; m=1; t=1740000000; d=test1.dkim2.com;
+       mf=PHNlbmRlckB0ZXN0MS5ka2ltMi5jb20+;
+       rt=PHJlY2lwaWVudEBleGFtcGxlLmNvbT4=;
+       s=rsa1024:rsa-sha256:gTB+t8y19E9TfDAZCoTRXp6iLamHSg2pN7Q4ynDIQcjjnwVutEDZz5S9uYf5kAe2gkjoGu07IV2UMB12pDY/CFZFROdHvAGB8rJyH9wvAcUPwyTpnvBJgC/4YVT3UqSF1hUb+Edg2KeLdk6URCKVFZjj9rHg4UKQBBy8PANN420=
+      From: sender@test1.dkim2.com
+      To: recipient@example.com
+      Subject: Simple test message
+      Date: Sat, 01 Mar 2026 12:00:00 +0000
+      Message-ID: <test-simple@test1.dkim2.com>
+
+      Hello, this is a simple test message.
+    id: simple_email_signed.eml
+  hooks:
+    eod:
+    - data: |-
+        Accept();
+      id: default
+servers:
+- id: default
+  phases:
+    eod:
+      hook: default
+  transport: mx
+transportgroups:
+- connection:
+    sourceip:
+      ipv6: false
+  dsn:
+    transport: mx
+  id: default
+  retry:
+    count: 30
+    intervals:
+    - interval: 60
+    - interval: 900
+    - interval: 3600
+      notify: true
+    - interval: 7200
+    - interval: 10800
+  transports:
+  - id: mx
+    session:
+      tls:
+        mode: dane
+version: '5.8'

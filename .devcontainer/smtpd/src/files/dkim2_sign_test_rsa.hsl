@@ -1,0 +1,34 @@
+import { dkim2_sign } from "extras://dkim2";
+
+$mail = MailMessage::File(File("simple_email.eml"));
+$privatekeystring = File::read("dkim2_rsa_test_key.private");
+$rcptto = ["recipient@example.com"];
+
+$privatekey = rsa_privatekey($privatekeystring);
+
+$signed = dkim2_sign(
+    $mail->toFile(),
+    "sender@test1.dkim2.com",
+    $rcptto,
+    "rsa",
+    "test1.dkim2.com",
+    $privatekey,
+    [
+    "timestamp" => 1740000000,
+    "exploded" => true,
+    "donotexplode" => true
+    ]
+);
+
+foreach ($signed["headers"] as $header)
+    $mail->modifyContent(0, 0, $header);
+
+$tags = header_dkim_decode(MailMessage::String($mail->toString())->getHeader("Dkim2-Signature"));
+if ($tags["f"] != "exploded,donotexplode") {
+    throw Exception("fail: f= does not equal 'exploded,donotexplode'");
+}
+if ($tags["t"] != "1740000000") {
+    throw Exception("fail: t= does not equal '1740000000'");
+}
+
+echo "test ok";

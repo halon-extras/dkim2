@@ -2,7 +2,7 @@
 
 ### Experimental - currently using draft-ietf-dkim-dkim2-spec-02
 
-Halon plugin for signing and verifying email with DKIM2. It provides HSL functions for generating `Message-Instance` and `DKIM2-Signature` headers and validating DKIM2-signed messages.
+Halon plugin for signing and verifying email with DKIM2 (using the [turscar/dkim2](https://pkg.go.dev/go.turscar.ie/dkim2) library). It provides HSL functions for generating `Message-Instance` and `DKIM2-Signature` headers and validating DKIM2-signed messages.
 
 ## Installation
 

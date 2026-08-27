@@ -30,6 +30,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/mail"
 	"strings"
 	"time"
@@ -156,7 +157,8 @@ type fileReader struct {
 }
 
 type DKIM2VerifyOptions struct {
-	IgnoreTimestamp bool `json:"ignoretimestamp"`
+	IgnoreTimestamp bool  `json:"ignoretimestamp"`
+	Timeout         int64 `json:"timeout"`
 }
 
 type DKIM2SignOptions struct {
@@ -380,11 +382,28 @@ func dkim2_sign(hhc *C.HalonHSLContext, args *C.HalonHSLArguments, ret *C.HalonH
 	}
 }
 
+type HalonDNSResolver struct{}
+
+func (r HalonDNSResolver) Resolve(ctx context.Context, selector, domain string) ([]string, error) {
+	hostname := dkim2.HostnameForKey(selector, domain)
+
+	txt, err := net.DefaultResolver.LookupTXT(ctx, hostname)
+	if err != nil {
+		var dnsErr *net.DNSError
+
+		// Preserve go.turscar.ie/dkim2's existing NXDOMAIN behavior:
+		// NXDOMAIN is treated as "no records", not as an error.
+		if errors.As(err, &dnsErr) && dnsErr.IsNotFound {
+			return []string{}, nil
+		}
+
+		return nil, err
+	}
+	return txt, nil
+}
+
 //export dkim2_verify
 func dkim2_verify(hhc *C.HalonHSLContext, args *C.HalonHSLArguments, ret *C.HalonHSLValue) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	reader, err := getFileReader(args, 0)
 	if err != nil {
 		SetException(hhc, err.Error())
@@ -404,6 +423,7 @@ func dkim2_verify(hhc *C.HalonHSLContext, args *C.HalonHSLArguments, ret *C.Halo
 	}
 
 	var opts DKIM2VerifyOptions
+	opts.Timeout = 5
 	optionsJSON, err := GetArgumentAsJSON(args, 3, false)
 	if err != nil {
 		SetException(hhc, err.Error())
@@ -416,10 +436,14 @@ func dkim2_verify(hhc *C.HalonHSLContext, args *C.HalonHSLArguments, ret *C.Halo
 		}
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(opts.Timeout)*time.Second)
+	defer cancel()
+
 	res := dkim2.Verify(ctx, reader, dkim2.VerifyOptions{
 		MailFrom:        mailFrom,
 		RcptTo:          rcptTo,
 		IgnoreTimestamp: opts.IgnoreTimestamp,
+		Resolver:        HalonDNSResolver{},
 	})
 
 	dkim2State := res.State()

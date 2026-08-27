@@ -86,7 +86,7 @@ scripting:
           $mail->toFile(),
           "sender@test1.dkim2.com",
           $rcptto,
-          "ed25519",
+          "rsa",
           "test1.dkim2.com",
           $privatekey,
           [
@@ -111,11 +111,11 @@ scripting:
     id: dkim2_sign_test_rsa.hsl
   - data: "import { dkim2_verify } from \"extras://dkim2\";\n\n$mail = MailMessage::File(File(\"\
       simple_email_signed.eml\"));\n\n$rcptto = [\"recipient@example.com\"];\n\n$dkim2options\
-      \ = [\n    \"ignoretimestamp\" => true,\n];\n\n$verified = dkim2_verify($mail->toFile(),\
-      \ \"sender@test1.dkim2.com\", $rcptto, $dkim2options);\n\nif (!$verified[\"\
-      result\"]) \n{\n    echo \"dkim2 signature not found\";\n}\n\nelse if ($verified[\"\
-      result\"] != \"pass\")\n{\n    throw $verified[\"error\"];\n} \nelse \n{\n \
-      \   echo \"verfied ok!\";\n}\n"
+      \ = [\n    \"ignoretimestamp\" => true,\n    \"timeout\" => 10\n];\n\n$verified\
+      \ = dkim2_verify($mail->toFile(), \"sender@test1.dkim2.com\", $rcptto, $dkim2options);\n\
+      \nif (!$verified[\"result\"]) \n{\n    echo \"dkim2 signature not found\";\n\
+      }\n\nelse if ($verified[\"result\"] != \"pass\")\n{\n    throw $verified[\"\
+      error\"];\n} \nelse \n{\n    echo \"verfied ok!\";\n}\n"
     id: dkim2_verify_test.hsl
   - data: |-
       From: sender@test1.dkim2.com

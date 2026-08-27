@@ -6,6 +6,7 @@ $rcptto = ["recipient@example.com"];
 
 $dkim2options = [
     "ignoretimestamp" => true,
+    "timeout" => 10
 ];
 
 $verified = dkim2_verify($mail->toFile(), "sender@test1.dkim2.com", $rcptto, $dkim2options);

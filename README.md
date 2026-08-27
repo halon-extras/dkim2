@@ -106,6 +106,7 @@ Verify a `DKIM2-Signature`.
 The following options are available in the **dkim2options** array
 
 - `ignoretimestamp` - Reject anything with a timestamp more than 14 days old. Defaults to `false`
+- `timeout` - Maximum time in seconds allowed for DNS key lookups during verification. Defaults to `5`
 
 **Returns**
 

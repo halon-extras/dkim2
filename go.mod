@@ -9,6 +9,6 @@ require (
 	codeberg.org/miekg/dns v0.6.73 // indirect
 	github.com/pkg/diff v0.0.0-20241224192749-4e6772a4315c // indirect
 	golang.org/x/crypto v0.52.0 // indirect
-	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 )

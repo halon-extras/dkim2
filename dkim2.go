@@ -30,7 +30,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/mail"
 	"strings"
 	"time"
@@ -162,12 +161,13 @@ type DKIM2VerifyOptions struct {
 }
 
 type DKIM2SignOptions struct {
-	Nonce        string `json:"nonce"`
-	Timestamp    int64  `json:"timestamp"`
-	Exploded     bool   `json:"exploded"`
-	DoNotExplode bool   `json:"donotexplode"`
-	DoNotModify  bool   `json:"donotmodify"`
-	Feedback     bool   `json:"feedback"`
+	Nonce         string        `json:"nonce"`
+	Timestamp     int64         `json:"timestamp"`
+	Exploded      bool          `json:"exploded"`
+	DoNotExplode  bool          `json:"donotexplode"`
+	DoNotModify   bool          `json:"donotmodify"`
+	Feedback      bool          `json:"feedback"`
+	Modifications *dkim2.Recipe `json:"modifications"`
 }
 
 type DKIM2VerifyReturnValue struct {
@@ -352,16 +352,17 @@ func dkim2_sign(hhc *C.HalonHSLContext, args *C.HalonHSLArguments, ret *C.HalonH
 	}
 
 	options := dkim2.SignOptions{
-		Nonce:        opts.Nonce,
-		Timestamp:    opts.Timestamp,
-		Domain:       domain,
-		Keys:         []dkim2.SigningKey{{Selector: selector, Signer: privateKey}},
-		Exploded:     opts.Exploded,
-		DoNotExplode: opts.DoNotExplode,
-		DoNotModify:  opts.DoNotModify,
-		Feedback:     opts.Feedback,
-		MailFrom:     mailFrom,
-		RcptTo:       rcptTo,
+		Nonce:         opts.Nonce,
+		Timestamp:     opts.Timestamp,
+		Domain:        domain,
+		Keys:          []dkim2.SigningKey{{Selector: selector, Signer: privateKey}},
+		Exploded:      opts.Exploded,
+		DoNotExplode:  opts.DoNotExplode,
+		DoNotModify:   opts.DoNotModify,
+		Feedback:      opts.Feedback,
+		MailFrom:      mailFrom,
+		RcptTo:        rcptTo,
+		Modifications: opts.Modifications,
 	}
 
 	headers, err := dkim2.SignMessage(message, options)
@@ -380,26 +381,6 @@ func dkim2_sign(hhc *C.HalonHSLContext, args *C.HalonHSLArguments, ret *C.HalonH
 	if err := SetReturnValueToAny(ret, value); err != nil {
 		SetException(hhc, err.Error())
 	}
-}
-
-type HalonDNSResolver struct{}
-
-func (r HalonDNSResolver) Resolve(ctx context.Context, selector, domain string) ([]string, error) {
-	hostname := dkim2.HostnameForKey(selector, domain)
-
-	txt, err := net.DefaultResolver.LookupTXT(ctx, hostname)
-	if err != nil {
-		var dnsErr *net.DNSError
-
-		// Preserve go.turscar.ie/dkim2's existing NXDOMAIN behavior:
-		// NXDOMAIN is treated as "no records", not as an error.
-		if errors.As(err, &dnsErr) && dnsErr.IsNotFound {
-			return []string{}, nil
-		}
-
-		return nil, err
-	}
-	return txt, nil
 }
 
 //export dkim2_verify
@@ -443,7 +424,6 @@ func dkim2_verify(hhc *C.HalonHSLContext, args *C.HalonHSLArguments, ret *C.Halo
 		MailFrom:        mailFrom,
 		RcptTo:          rcptTo,
 		IgnoreTimestamp: opts.IgnoreTimestamp,
-		Resolver:        HalonDNSResolver{},
 	})
 
 	dkim2State := res.State()

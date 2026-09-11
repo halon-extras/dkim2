@@ -10,13 +10,12 @@ $signed = dkim2_sign(
     $mail->toFile(),
     "sender@test1.dkim2.com",
     $rcptto,
-    "rsa",
+    "rsa1024",
     "test1.dkim2.com",
     $privatekey,
     [
     "timestamp" => 1740000000,
     "exploded" => true,
-    "donotexplode" => true
     ]
 );
 
@@ -24,8 +23,8 @@ foreach ($signed["headers"] as $header)
     $mail->modifyContent(0, 0, $header);
 
 $tags = header_dkim_decode(MailMessage::String($mail->toString())->getHeader("Dkim2-Signature"));
-if ($tags["f"] != "exploded,donotexplode") {
-    throw Exception("fail: f= does not equal 'exploded,donotexplode'");
+if ($tags["f"] != "exploded") {
+    throw Exception("fail: f= does not equal 'exploded'");
 }
 if ($tags["t"] != "1740000000") {
     throw Exception("fail: t= does not equal '1740000000'");

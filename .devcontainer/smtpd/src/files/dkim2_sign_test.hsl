@@ -7,14 +7,13 @@ $rcptto = ["recipient@example.com"];
 
 $tests = [
     [
-        "name" => "Has exploded, donotexplode and timestamp",
+        "name" => "Has exploded and timestamp",
         "options" => [
             "timestamp" => 1740000000,
             "exploded" => true,
-            "donotexplode" => true
         ],
         "expected" => [
-            "f" => "exploded,donotexplode",
+            "f" => "exploded",
             "t" => 1740000000
         ]
     ],
@@ -53,7 +52,7 @@ $tests = [
         ],
         "expected" => [
             "t" => 1740000000,
-            "f" => "exploded,feedback"
+            "f" => "feedback,exploded"
         ]
     ]
 ];

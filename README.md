@@ -52,8 +52,10 @@ The following options are available in the **dkim2options** array:
 - `donotexplode` boolean - Adds `donotexplode` to the `f=` tag, requesting that the message not be sent to more than one recipient. Defaults to `false`
 - `donotmodify` boolean - Adds `donotmodify` to the `f=` tag, requesting that the message body and existing headers not be modified. Defaults to `false`
 - `feedback` boolean - Adds `feedback` to the `f=` tag, requesting feedback about how the message is handled during and after delivery. Defaults to `false`
+- `modifications` array - Optional modification recipe in the dkim2 package's format, containing `h` (header recipes) and/or `b` (body steps). The recipe reconstructs the previous message from the already modified message passed to `dkim2_sign`. It is encoded in the `Message-Instance` header's `r=` tag and protected by the signature. Omit it when no recipe is needed
 
-These options are encoded into and protected by the generated `DKIM2-Signature` header. See [sections 7.3 and 7.9 of the DKIM2 specification](https://datatracker.ietf.org/doc/html/draft-ietf-dkim-dkim2-spec-02#section-7.3).
+The other options are encoded into and protected by the generated `DKIM2-Signature` header. See [sections 7.3 and 7.9 of the DKIM2 specification](https://datatracker.ietf.org/doc/html/draft-ietf-dkim-dkim2-spec-02#section-7.3).
+
 
 **Returns**
 
